@@ -1,0 +1,16 @@
+# No SendGrid/Mailgun - Pure Python
+import smtpd
+import asyncore
+from email.mime.image import MIMEImage
+
+class TrackingSMTPServer(smtpd.SMTPServer):
+    def process_message(self, peer, mailfrom, rcpttos, data, **kwargs):
+        # Add tracking pixel
+        tracking_id = generate_uuid()
+        pixel_url = f"http://localhost:8080/track/{tracking_id}.gif"
+        
+        # Log locally
+        with open('tracking.log', 'a') as f:
+            f.write(f"{tracking_id},{peer[0]},{mailfrom}\n")
+        
+        return f"250 OK - ID: {tracking_id}"
