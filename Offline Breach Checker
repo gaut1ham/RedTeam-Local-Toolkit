@@ -1,0 +1,16 @@
+# Download breaches once, check locally
+import hashlib
+import gzip
+
+class LocalBreachChecker:
+    def __init__(self):
+        self.hashes = self.load_hashes()
+    
+    def load_hashes(self):
+        # Load from local file (update periodically)
+        with gzip.open('data/breaches/pwned-passwords-sha1.gz', 'rt') as f:
+            return set(line.strip().split(':')[0] for line in f)
+    
+    def check_password(self, password):
+        sha1_hash = hashlib.sha1(password.encode()).hexdigest().upper()
+        return sha1_hash in self.hashes
