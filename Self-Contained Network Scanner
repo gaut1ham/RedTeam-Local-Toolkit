@@ -1,0 +1,17 @@
+# Pure Scapy - no external services
+from scapy.all import ARP, Ether, srp
+import ipaddress
+
+class LocalNetworkMapper:
+    def scan_subnet(self, subnet):
+        arp = ARP(pdst=str(subnet))
+        ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+        packet = ether/arp
+        
+        result = srp(packet, timeout=3, verbose=0)[0]
+        
+        devices = []
+        for sent, received in result:
+            devices.append({'ip': received.psrc, 'mac': received.hwsrc})
+        
+        return devices
